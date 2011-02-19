@@ -2,7 +2,7 @@ require 'twitter'
 require 'json'
 
 class Scotfail
-  
+
   def initialize
     if search.count > 0
       true
@@ -10,15 +10,19 @@ class Scotfail
       false
     end
   end
-  
+
   def retweet
     authenticate
     tweets.each do |tweet|
       tweet_text = "RT @#{tweet.from_user}: #{tweet.text}".slice(0,139)
-      Twitter.update tweet_text
+      begin
+        Twitter.update tweet_text
+      rescue Twitter::Forbidden => e
+        STDERR.puts e
+      end
     end
   end
-  
+
   def last_read_id
     if File.exists?(CONFIG[:LAST_ID_FILE])
       File.new(CONFIG[:LAST_ID_FILE], 'r').gets
@@ -26,19 +30,19 @@ class Scotfail
       1
     end
   end
-  
+
   def last_read_id=(id)
-    output = File.new(CONFIG[:LAST_ID_FILE], 'w')
-    output.write id
-    output.close
+    output = File.open(CONFIG[:LAST_ID_FILE], 'w') do |output|
+      output.write id
+    end
   end
-  
+
   def tweets
     @tweets || []
   end
-  
+
   private
-  
+
   def authenticate
     Twitter.configure do |config|
       config.consumer_key = CONFIG[:CONSUMER_KEY] 
@@ -47,7 +51,7 @@ class Scotfail
       config.oauth_token_secret = CONFIG[:ACCESS_SECRET]
     end
   end
-  
+
   def search
     twitter = Twitter::Search.new
     twitter.not_from 'scotfail'   # Don't repeat yourself.
@@ -57,7 +61,7 @@ class Scotfail
     twitter.since_date Date.today.strftime("%Y-%m-%d")
                                   # Don't care about yesterday.
     twitter.hashtag 'scotfail'    # All we do care about!
-    
+
     if CONFIG[:BANNED]            # Use this config option to
                                   # list people you don't want the
                                   # bot to retweet.
@@ -65,10 +69,9 @@ class Scotfail
         twitter.not_from banned
       end
     end
-    
-    last_read_id = twitter.fetch.to_a.first.id_str unless twitter.count == 0
-    
+
+    self.last_read_id=twitter.fetch.to_a.first.id_str unless twitter.count == 0
+
     @tweets = twitter.to_a.reverse
   end
-  
 end
