@@ -4,11 +4,7 @@ require 'json'
 class Scotfail
 
   def initialize
-    if search.count > 0
-      true
-    else
-      false
-    end
+    search
   end
 
   def retweet
