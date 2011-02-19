@@ -1,0 +1,12 @@
+SCOTFAIL
+--------
+
+This is the revised version of the code that powers the Twitter bot at http://twitter.com/scotfail.
+
+@scotfail is notable mostly as a social phenomenon rather than a technical one, but some people had expressed an interest in seeing the code that was providing the service, so after a rewrite to make it less embarrassing, I've pushed it out here.
+
+The 'twitter' gem really does all the hard work, and especially the post-1.0 releases are extremely nice to work with. Props to all the committers to that gem!
+
+To actually use this code you'll need to create a Twitter account of your own, and while logged in as that account create a new Twitter app in Twitter's dev section. You can then get the various keys you need to fill out config/config.rb. If you want to deploy using capistrano, you'll need to set up config/deploy.rb too. As there's no long-running processes, you just need to do 'cap deploy:update' to push new code live.
+
+Finally, you'll want an entry in cron that runs the script periodically. @scotfail is only called once every 15 minutes because I have other things living on the same machine that access the Twitter API and Twitter have rate-limiting in place. If this is the only thing running on your machine that talks to Twitter, you could increase the frequency of the cronjobs.
