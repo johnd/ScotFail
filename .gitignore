@@ -1,3 +1,4 @@
 last_read_id.txt
 config/config.rb
 .bundle
+config/deploy.rb

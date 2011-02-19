@@ -1,0 +1,20 @@
+set :application, "scotfail"
+set :repository,  "/path/to/local/copy/.git"
+set :deploy_to, "/path/to/remote/deploy/location"
+set :deploy_via, :copy
+set :scm, :git
+set :user, "remote_user"
+set :use_sudo, false
+set :domain, 'deploy.machine.example.com'
+
+role :app, domain
+
+# Allow ssh to use ssh keys
+set :ssh_options, { :forward_agent => true }
+
+deploy.task :symlinks do
+  run "ln -nfs #{shared_path}/config/config.rb #{release_path}/config/config.rb"
+end
+
+after :deploy, 'deploy:cleanup'
+after 'deploy:update_code', 'deploy:symlinks'
